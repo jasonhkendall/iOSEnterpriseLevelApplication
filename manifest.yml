@@ -1,0 +1,19 @@
+---
+declared-services:
+  SwiftEnterpriseDemo-Alert:
+    label: alertnotification
+    plan: authorizedusers
+  SwiftEnterpriseDemo-Auto-Scaling:
+    label: Auto-Scaling
+    plan: free
+applications:
+- name: SwiftEnterpriseDemo
+  memory: 256M
+  instances: 1
+  random-route: true
+  disk_quota: 1024M
+  command: SwiftEnterpriseDemo
+  buildpack: swift_buildpack
+  services:
+  - SwiftEnterpriseDemo-Alert
+  - SwiftEnterpriseDemo-Auto-Scaling

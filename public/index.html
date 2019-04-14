@@ -1,0 +1,115 @@
+<!--
+* Copyright IBM Corporation 2017
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+-->
+
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular.min.js" type="text/javascript"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular-cookies.min.js" type="text/javascript"></script>
+    <script src="vendor/angular-websocket.min.js"></script>
+    <script src="js/homeController.js"></script>
+    <script src="js/autoScalingController.js"></script>
+    <script src="js/circuitBreakerController.js"></script>
+    <script src="js/websocketFactory.js"></script>
+    <script src="index.js"></script>
+    
+    <title>Swift Enterprise Demo</title>
+</head>
+
+<body ng-app="demoApp" ng-controller="homeController" ng-init="getInitData()">
+    <div class="header flex-row">
+        <div class="left container item">
+            <div class="item swift-logo"><img class="bird" src="assets/colorless_bird.svg"></div>
+            <div class="item title">Swift Enterprise Demo</div>
+        </div>
+        <div class="right container item">
+            <a class="item dashboard-link" ng-href="{{dashboardLink}}" target="_blank">Metrics Dashboard</a>
+        </div>
+    </div>
+    <div class="content">
+        <div class="flex-row">
+            <div class="left tabs-row-item">
+                <span class="tab" ng-class="{'active-tab': displayedTab == 'autoScaling'}" ng-click="displayedTab = 'autoScaling'">Auto-Scaling Demo</span>
+                <span class="tab" ng-class="{'active-tab': displayedTab == 'circuitBreaker'}" ng-click="displayedTab = 'circuitBreaker'">Circuit Breaker Demo</span>
+            </div>
+            <div class="center tabs-row-item">
+                <a ng-show="displayedTab == 'autoScaling' && autoScalingLink" ng-href="{{autoScalingLink}}" target="_blank">Auto-Scaling Dashboard</a>
+            </div>
+            <div class="right tabs-row-item">
+                <span ng-show="instanceID >= 0">Running on instance {{instanceID}}.</span>
+            </div>
+        </div>
+        <hr class="top-line" />
+        <div ng-controller="autoScalingController as asCtrl" ng-show="displayedTab == 'autoScaling'">
+            <fieldset>
+            <p>
+                <fieldset>
+                    <legend>Request Memory Usage</legend>
+                    <br><div class="left container"><span class="item">Memory to use: </span><input type="range" id="memoryToUse" name="memoryToUse" class="item" min="0" max="{{memoryMax}}" step="{{memoryStep}}" ng-model="asCtrl.memoryValue" ng-mouseup="asCtrl.requestMemory(asCtrl.memoryValue)" /><span class="item"> {{asCtrl.displayMemoryValue(asCtrl.memoryValue, memoryUnit)}} {{memoryUnitLabel}}</span></div></br>
+                    Status: <span id="memoryResponse">{{asCtrl.memoryMessage}}</span>
+                </fieldset>
+            </p>
+            
+            <p>
+                <fieldset>
+                    <legend>Set Response Time</legend>
+                    <br><div class="left container"><span class="item">Delay requests by </span><input type="range" id="responseTime" name="responseTime" class="item" min="0" max="60" step="1" ng-model="asCtrl.responseTimeValue" ng-mouseup="asCtrl.setResponseDelay(asCtrl.responseTimeValue)" /><span class="item"> {{asCtrl.responseTimeValue}} seconds</span></div></br>
+                    Status: <span id="responseTimeResponse">{{asCtrl.responseTimeMessage}}</span>
+                </fieldset>
+            </p>
+            
+            <p>
+                <fieldset>
+                    <legend>Sync Values with Server</legend>
+                    <br><button ng-click="asCtrl.syncValues()">Sync</button></br>
+                    <br>Status: <span id="syncResponse">{{asCtrl.syncMessage}}</span></br>
+                </fieldset>
+            </p>
+            </fieldset>
+            
+            <p>
+                <fieldset>
+                    <legend>Request Throughput</legend>
+                    <br><div class="left container"><span class="item">Number of requests: </span><input type="range" id="throughput" name="throughput" class="item" min="0" max="30" step="1" ng-model="asCtrl.throughputValue" ng-mouseup="asCtrl.requestThroughput(asCtrl.throughputValue)" /><span class="item"> {{asCtrl.throughputValue}} per second</span></div></br>
+                    Status: <span id="throughputResponse">{{asCtrl.throughputMessage}}</span>
+                </fieldset>
+            </p>
+        </div>
+    
+        <div ng-controller="circuitBreakerController as cbCtrl" ng-show="displayedTab == 'circuitBreaker'">
+            <div ng-show="websocketErrorMessage">
+                <p>
+                    <fieldset class="errorBox">
+                        {{websocketErrorMessage}}
+                    </fieldset>
+                </p>
+            </div>
+            
+            <p>
+                <fieldset>
+                    <legend>Check Circuit</legend>
+                    <br><button ng-click="cbCtrl.disableEndpoint()">Disable Microservice Endpoint</button><button ng-click="cbCtrl.enableEndpoint()">Enable Microservice Endpoint</button></br>
+                    <br>Response Delay: <input type="number" min="0" max="600" placeholder="0" ng-model="cbCtrl.endpointDelay"/> seconds <button ng-click="cbCtrl.changeEndpointDelay(cbCtrl.endpointDelay)">Change Delay</button></br>
+                    <br><button ng-click="cbCtrl.invokeService()">Invoke Microservice</button></br>
+                    <br>Request Status: <span id="circuitResponse">{{cbCtrl.circuitMessage}}</span></br>
+                    <br>Endpoint Status: <span id="endpointResponse">{{cbCtrl.endpointMessage}}</span></br>
+                    <br>Circuit status: {{circuitState}}.</br>
+                </fieldset>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
