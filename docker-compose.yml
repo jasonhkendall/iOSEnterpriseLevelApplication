@@ -1,0 +1,7 @@
+app:
+  image: ibmcom/swift-ubuntu:4.0.3
+  ports:
+    - "8080:8080"
+  volumes:
+    - .:/SwiftEnterpriseDemo
+  command: bash -c "cd /SwiftEnterpriseDemo && swift package clean && swift build && ./.build/debug/SwiftEnterpriseDemo"
